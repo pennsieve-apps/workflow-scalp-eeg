@@ -242,6 +242,10 @@ BrainVision/EEGLAB/FIF inputs are listed by their registry types where one exist
   "tables": [...], "warnings": [...]}`. **The report renders the `figures` list in order with its
   captions**, so every app decides which figures matter and explains them in a caption an
   epileptologist understands.
+- `summary.json` may carry a top-level `notice` (string): a method caveat every reader must see,
+  e.g. eeg-spikes' "detectors validated on intracranial EEG, run here on scalp EEG".
+  `eeg-report` shows it as a box at the top of that step's section. Usage terms (licences) go in
+  `provenance.json` `licence_notice` instead.
 
 ### `provenance.json` (exact keys)
 
