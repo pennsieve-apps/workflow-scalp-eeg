@@ -264,8 +264,8 @@ staged. Read only; never modify.
 
 | Folder | What | Source |
 |---|---|---|
-| `data/siena/` | BIDS Siena Scalp EEG Database: 14 adults with focal epilepsy, 19-channel 10-20 referential EEG, 512 Hz, 47 annotated seizures (HED-SCORE events.tsv), hours per subject | Zenodo 10640762 (Dan et al., CC BY 4.0), from PhysioNet doi:10.13026/5d4a-j060 (Detti et al.) |
-| `data/chbmit/` | CHB-MIT Scalp EEG Database, subject chb01: 42 one-hour EDFs, 23 bipolar channels, 256 Hz, 7 seizures in `chb01-summary.txt` | PhysioNet doi:10.13026/C2K01R (ODC-By 1.0) |
+| `data/siena/BIDS_Siena/` | BIDS Siena Scalp EEG Database: 14 adults with focal epilepsy, 41 EDF runs, 19-channel 10-20 EEG already in average reference (`Fp1-Avg`, old names T3/T4/T5/T6), 256 Hz (resampled from 512 Hz by the BIDS conversion), 47 annotated seizures (HED-SCORE events.tsv with wall-clock `dateTime`) | Zenodo 10640762 (Dan et al., CC BY 4.0), from PhysioNet doi:10.13026/5d4a-j060 (Detti et al.) |
+| `data/chbmit/chb01/` | CHB-MIT Scalp EEG Database, subject chb01: 42 one-hour EDFs, 23 longitudinal-bipolar channels only (`FP1-F7`, …), 256 Hz, 7 seizures in `chb01-summary.txt` and `*.edf.seizures` | PhysioNet doi:10.13026/C2K01R (ODC-By 1.0) |
 | `data/ds003555/` | First 3 of 30 children with epilepsy: 3 h of sleep EEG, 10-20, EDF, with the authors' scalp HFO markings in `derivatives/` | OpenNeuro ds003555 v1.0.1 (CC0; Cserpan et al. 2021) |
 
 Outputs of finished apps on the demo data go to `data/work/<demo>/<app>/` for the builders after
