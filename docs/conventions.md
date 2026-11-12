@@ -43,7 +43,8 @@ Workflows:
   one input port (the report). An app that can run more than once in a workflow adds a `LABEL`
   level below it (`<app>/<label>/...`; `LABEL` defaults to empty = no extra level). The one
   exception is `eeg-prep`: its `eeg` port **is** the BIDS derivative (`dataset_description.json`
-  at the port root, like a BIDS dataset), with its `provenance.json` next to it.
+  at the port root, like a BIDS dataset), with its `provenance.json` next to it. Its `qc` port
+  follows the one-top-folder rule (`qc/eeg-prep/qc.csv`, figures, `summary.json`, `provenance.json`).
 - Inputs with several ports use `placement: subfolder` (each arrives at `$INPUT_DIR/<port>/`).
   Apps must also work when everything is merged side by side at the root of `$INPUT_DIR`, so they
   find files **by name and content, recursively, following symlinks** (INPUT_DIR entries are
@@ -131,7 +132,8 @@ low-pass `LOWPASS` (default none: eeg-spikes and eeg-spectral want the full band
 heart, line noise or channel noise with probability ≥ `ICLABEL_THRESHOLD` (0.8) are removed;
 needs ≥ 8 channels with positions; skipped with a note otherwise), `asr`, `both`, or `none`.
 Removed components are listed in `qc.csv`. Bad segments (amplitude, flat, muscle z-score) go to
-`_events.tsv` as `bad_segment` rows; later steps leave them out.
+`_events.tsv` as `bad_segment` rows; later steps leave them out, **except seizure detection**:
+high-amplitude ictal activity can exceed the amplitude limit, so bad segments may overlap seizures.
 
 ### `recordings.csv`
 
@@ -186,7 +188,8 @@ the noise floor of scalp EEG. Amplitudes are in µV.
 
 All CSV, UTF-8, header row, `.` decimal, long format keyed by `recording_id` (and `channel`: the
 `_channels.tsv` name). Times are seconds from the recording start. Windows and events exclude
-`bad_segment` and `artifact` intervals unless a parameter says otherwise. Each step writes its
+`bad_segment` and `artifact` intervals unless a parameter says otherwise (eeg-seizures keeps
+`bad_segment` intervals by default, see above). Each step writes its
 parameters into `provenance.json`.
 
 | Step | Files (under `<app>/`) |
