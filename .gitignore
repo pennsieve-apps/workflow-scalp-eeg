@@ -1,0 +1,9 @@
+data/*
+!data/README.md
+__pycache__/
+.venv/
+.DS_Store
+*.nwb
+*.mp4
+*.tif
+*.tiff
