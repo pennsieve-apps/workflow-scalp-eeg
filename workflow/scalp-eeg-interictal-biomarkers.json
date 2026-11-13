@@ -1,0 +1,235 @@
+{
+ "name": "Scalp EEG Interictal Biomarkers",
+ "summary": "Scalp EEG: spectral biomarkers, PDR, spikes by sleep stage, sleep, connectivity, report.",
+ "description": "Interictal biomarkers of clinical scalp EEG for epilepsy and neurology research. Prepares the recordings (canonical 10-20 channels, bad channels, filters, average reference, ICA + ICLabel artifact removal; BIDS-EEG or clinical formats), then computes spectral biomarkers (band power, aperiodic exponent with specparam, posterior dominant rhythm, revised Brain Symmetry Index, slowing), sleep staging with spindles and slow waves (YASA), interictal spike candidates with rates per sleep stage (epycom detectors, validated on intracranial EEG and labelled as a baseline on scalp EEG), and sensor-space connectivity (wPLI, imaginary coherence, envelope correlation), and writes an HTML/PDF report with every method's caveats. Research use only; outputs are to be reviewed against the EEG, not clinical findings.",
+ "inputs": [
+  {
+   "id": "eeg",
+   "name": "Scalp EEG recordings",
+   "description": "Clinical scalp EEG (routine or long-term): a BIDS-EEG dataset (HED-SCORE seizure events read), or EDF/EDF+, BDF, BrainVision, EEGLAB, FIF, Nihon Kohden or Natus recordings, plus optional CHB-MIT-style summary files or a labels.csv with annotated seizures.",
+   "position": {
+    "x": 40,
+    "y": 300
+   }
+  }
+ ],
+ "processors": [
+  {
+   "id": "prep",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-prep",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "eeg"
+   ],
+   "position": {
+    "x": 300,
+    "y": 300
+   },
+   "cpu": "2048",
+   "memory": "4096",
+   "inputs": []
+  },
+  {
+   "id": "spectral",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-spectral",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep"
+   ],
+   "position": {
+    "x": 560,
+    "y": 40
+   },
+   "cpu": "1024",
+   "memory": "2048",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    }
+   ]
+  },
+  {
+   "id": "sleep",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-sleep",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep"
+   ],
+   "position": {
+    "x": 560,
+    "y": 300
+   },
+   "cpu": "2048",
+   "memory": "4096",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    }
+   ]
+  },
+  {
+   "id": "spikes",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-spikes",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep",
+    "sleep"
+   ],
+   "position": {
+    "x": 820,
+    "y": 300
+   },
+   "cpu": "2048",
+   "memory": "3072",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    },
+    {
+     "from": "sleep",
+     "output": "sleep",
+     "input": "sleep"
+    }
+   ]
+  },
+  {
+   "id": "connectivity",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-connectivity",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep"
+   ],
+   "position": {
+    "x": 560,
+    "y": 560
+   },
+   "cpu": "1024",
+   "memory": "2048",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    }
+   ]
+  },
+  {
+   "id": "report",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-report",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep",
+    "spectral",
+    "sleep",
+    "spikes",
+    "connectivity"
+   ],
+   "position": {
+    "x": 1080,
+    "y": 300
+   },
+   "cpu": "1024",
+   "memory": "2048",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    },
+    {
+     "from": "prep",
+     "output": "qc",
+     "input": "qc"
+    },
+    {
+     "from": "spectral",
+     "output": "spectral",
+     "input": "spectral"
+    },
+    {
+     "from": "sleep",
+     "output": "sleep",
+     "input": "sleep"
+    },
+    {
+     "from": "spikes",
+     "output": "spikes",
+     "input": "spikes"
+    },
+    {
+     "from": "connectivity",
+     "output": "connectivity",
+     "input": "connectivity"
+    }
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "id": "report_out",
+   "name": "Report (HTML, PDF)",
+   "from": {
+    "step": "report",
+    "output": "report"
+   },
+   "position": {
+    "x": 1340,
+    "y": 170
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-biomarkers/report"
+    }
+   }
+  },
+  {
+   "id": "tables_out",
+   "name": "Tables",
+   "from": {
+    "step": "report",
+    "output": "tables"
+   },
+   "position": {
+    "x": 1340,
+    "y": 300
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-biomarkers/tables"
+    }
+   }
+  },
+  {
+   "id": "eeg_out",
+   "name": "Prepared EEG (BIDS-EEG derivative)",
+   "from": {
+    "step": "prep",
+    "output": "eeg"
+   },
+   "position": {
+    "x": 1340,
+    "y": 430
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-biomarkers/eeg-prep"
+    }
+   }
+  }
+ ]
+}
