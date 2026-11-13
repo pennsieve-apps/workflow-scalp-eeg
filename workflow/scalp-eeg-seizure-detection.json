@@ -1,0 +1,207 @@
+{
+ "name": "Scalp EEG Seizure Detection & Monitoring",
+ "summary": "Scalp EEG: seizure candidates in SzCORE format, scored; spikes by sleep stage; report.",
+ "description": "Seizure detection and monitoring on clinical scalp EEG (long-term video-EEG or routine). Prepares the recordings (eeg-prep), detects seizure candidates with a line-length baseline detector or a user-supplied ONNX model and writes them in the SzCORE event format, scored with timescoring (event sensitivity, precision, F1 and false detections per day) against annotated seizures when there are any; stages sleep (YASA) and counts interictal spike candidates per sleep stage; and writes an HTML/PDF report. Detections are candidates for review, with false detections per day always shown next to sensitivity. Research use only.",
+ "inputs": [
+  {
+   "id": "eeg",
+   "name": "Scalp EEG recordings",
+   "description": "Clinical scalp EEG (routine or long-term): a BIDS-EEG dataset (HED-SCORE seizure events read), or EDF/EDF+, BDF, BrainVision, EEGLAB, FIF, Nihon Kohden or Natus recordings, plus optional CHB-MIT-style summary files or a labels.csv with annotated seizures.",
+   "position": {
+    "x": 40,
+    "y": 300
+   }
+  }
+ ],
+ "processors": [
+  {
+   "id": "prep",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-prep",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "eeg"
+   ],
+   "position": {
+    "x": 300,
+    "y": 300
+   },
+   "cpu": "2048",
+   "memory": "4096",
+   "inputs": []
+  },
+  {
+   "id": "seizures",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-seizures",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep"
+   ],
+   "position": {
+    "x": 560,
+    "y": 170
+   },
+   "cpu": "1024",
+   "memory": "2048",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    }
+   ]
+  },
+  {
+   "id": "sleep",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-sleep",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep"
+   ],
+   "position": {
+    "x": 560,
+    "y": 430
+   },
+   "cpu": "2048",
+   "memory": "4096",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    }
+   ]
+  },
+  {
+   "id": "spikes",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-spikes",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep",
+    "sleep"
+   ],
+   "position": {
+    "x": 820,
+    "y": 430
+   },
+   "cpu": "2048",
+   "memory": "3072",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    },
+    {
+     "from": "sleep",
+     "output": "sleep",
+     "input": "sleep"
+    }
+   ]
+  },
+  {
+   "id": "report",
+   "type": "processor",
+   "sourceUrl": "https://github.com/pennsieve-apps/eeg-report",
+   "tag": "v0.1.0",
+   "dependsOn": [
+    "prep",
+    "seizures",
+    "sleep",
+    "spikes"
+   ],
+   "position": {
+    "x": 1080,
+    "y": 300
+   },
+   "cpu": "1024",
+   "memory": "2048",
+   "inputs": [
+    {
+     "from": "prep",
+     "output": "eeg",
+     "input": "eeg"
+    },
+    {
+     "from": "prep",
+     "output": "qc",
+     "input": "qc"
+    },
+    {
+     "from": "seizures",
+     "output": "seizures",
+     "input": "seizures"
+    },
+    {
+     "from": "sleep",
+     "output": "sleep",
+     "input": "sleep"
+    },
+    {
+     "from": "spikes",
+     "output": "spikes",
+     "input": "spikes"
+    }
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "id": "report_out",
+   "name": "Report (HTML, PDF)",
+   "from": {
+    "step": "report",
+    "output": "report"
+   },
+   "position": {
+    "x": 1340,
+    "y": 170
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-seizures/report"
+    }
+   }
+  },
+  {
+   "id": "tables_out",
+   "name": "Tables",
+   "from": {
+    "step": "report",
+    "output": "tables"
+   },
+   "position": {
+    "x": 1340,
+    "y": 300
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-seizures/tables"
+    }
+   }
+  },
+  {
+   "id": "seizures_out",
+   "name": "Seizure candidates (SzCORE TSV)",
+   "from": {
+    "step": "seizures",
+    "output": "seizures"
+   },
+   "position": {
+    "x": 1340,
+    "y": 430
+   },
+   "default": {
+    "targetType": "Pennsieve Dataset",
+    "params": {
+     "TARGET_FOLDER": "derivatives/scalp-eeg-seizures/seizures"
+    }
+   }
+  }
+ ]
+}
