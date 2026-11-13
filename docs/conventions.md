@@ -140,9 +140,15 @@ high-amplitude ictal activity can exceed the amplitude limit, so bad segments ma
 One row per recording: `recording_id, subject, session, task, run, path` (relative to the port
 root), `sfreq, n_channels, n_good, duration_s, montage` (`average` | `linked-ears` |
 `as-recorded` | `bipolar-longitudinal`), `reference` (the reference channel name, or `average`),
-`kind` (`routine` ≤ 2 h | `long-term` > 2 h | `sleep` | `unknown`), `start_time` (ISO 8601 wall
-clock when the source has it, else empty: eeg-seizures needs it for `dateTime` and FP/day,
-eeg-sleep for time of night), `n_seizures` (annotated seizures in the source), `source_format`
+`kind` (`routine` ≤ 2 h | `long-term` > 2 h | `sleep` | `unknown`), `start_time` (ISO 8601 local wall
+clock **without a UTC offset**, e.g. `2016-01-01T19:39:33`, when the source has it, else empty: EDF
+headers carry local time with no zone, so an offset would be a false claim; eeg-seizures needs it
+for `dateTime` and FP/day, eeg-sleep for time of night), `labels_source` (where seizure labels came
+from: `events.tsv` | `annotations` | `summary` | `labels.csv`, `|`-joined when several; **empty when
+no label source exists**), `n_seizures` (annotated seizures in the source; **empty when
+`labels_source` is empty**, so "no seizures annotated" (0) and "never annotated" (empty) differ;
+apps that score against annotations, such as eeg-seizures, score only recordings with a
+`labels_source`), `source_format`
 (`bids-edf`, `edf`, `brainvision`, `eeglab`, `fif`, `nihon-kohden`, `natus`, ...), `age`, `sex`
 (from participants.tsv or the EDF header when known, else empty). Then any extra recording-level
 columns of `labels.csv` (see "Labels on input").
