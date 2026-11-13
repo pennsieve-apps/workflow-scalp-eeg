@@ -49,6 +49,13 @@ The sibling family is `~/code/pennsieve/workflow-epilepsy-ieeg` (intracranial). 
 `schemaVersion: "1.0"`, `application` with name/description/type processor/tags, `runtime`
 cpu/memory/computeTypes/timeoutSeconds, `parameters`, `inputs`, `outputs`, and a **`review` block**
 with a `generate` command that writes small test inputs, like processor-ieeg-hfo).
+The review block's layout rule (app-fixtures copies what the generator writes into the app's
+INPUT_DIR unchanged): a top-level `review.generate` must write exactly INPUT_DIR as a compute node
+lays it out (`<port>/` for `placement: subfolder`, files at the top for `placement: root`), with
+`root` naming the folder that becomes INPUT_DIR (e.g. `linked`); anything else it writes (truth
+files, alternative layouts) ends up in INPUT_DIR unless `root` excludes it. When the generator also
+writes such extras, use `review.inputs.<port>.generate` with `root: <port>` instead: only that
+subtree becomes the port's contents. Optional input ports need `required: false` on the port.
 Tags: `eeg`, `scalp-eeg`, `electrophysiology`, `epilepsy`, `neurology`, `neuroscience`, plus task
 tags (`preprocessing`, `quality-control`, `spike-detection`, `seizure-detection`, `sleep`,
 `spectral-analysis`, `connectivity`, `biomarkers`, `report`, ...).
