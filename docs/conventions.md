@@ -167,7 +167,7 @@ otherwise), `hemisphere` (`L` | `R` | `Z` midline, from the 10-20 name: odd = le
 
 BIDS `onset, duration, trial_type` plus `source` (`annotation` | `labels.csv` | `eeg-prep`) and
 `channels` (comma-separated, empty = all). `trial_type` values used here: `seizure` (onset and
-duration as annotated; `duration` empty when the end is unknown), `artifact` (annotated),
+duration as annotated; `duration` `n/a` (BIDS) when the end is unknown), `artifact` (annotated),
 `bad_segment` (found by eeg-prep), `eyes_open`, `eyes_closed`, `photic`, `hyperventilation`,
 `sleep` / `wake` (annotated states), `lights_off`, `lights_on`. HED-SCORE events of SzCORE-style
 BIDS datasets (`eventType` `sz`, `sz-foc`, ...) are read as `seizure` with the HED type kept in an
